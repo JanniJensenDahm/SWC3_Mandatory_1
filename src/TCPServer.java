@@ -10,8 +10,8 @@ import java.util.Scanner;
 public class TCPServer {
 
     public static void main(String[] args) throws Exception {
-    String message;
-    String userText;
+        String message;
+        String userText;
 
         ServerSocket socket = new ServerSocket(5656);
         Scanner fromUser = new Scanner(new InputStreamReader(System.in));
@@ -23,8 +23,29 @@ public class TCPServer {
         message = fromClient.nextLine();
         System.out.println(message);
 
-        while (true){
-            System.out.println("");
+        while (true) {
+            //Let server type message
+            System.out.println("Message: ");
+            userText = fromUser.nextLine();
+            toClient.writeBytes(userText + '\n');
+
+            //If message is 'quit', close connection
+            if (userText.equalsIgnoreCase("quit")) {
+                break;
+            }
+
+            //Get message from client
+            message = fromClient.nextLine();
+            System.out.println(message);
+
+            //If message is 'quit', close connection
+            if (message.equalsIgnoreCase("quit")) {
+                break;
+            }
         }
+
+        System.out.println("Connection closed");
+        connectionSocket.close();
+        socket.close();
     }
 }

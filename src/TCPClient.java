@@ -8,7 +8,7 @@ import java.util.Scanner;
  */
 public class TCPClient {
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         String message;
 
         Scanner fromUser = new Scanner(new InputStreamReader(System.in));
@@ -23,17 +23,23 @@ public class TCPClient {
         //System.out.println("Type username");
         //userInput = fromUser.next();
 
-        while (true){
+        while (true) {
+            //Let user type message
             System.out.println("Type message: ");
             message = fromUser.nextLine();
             toServer.writeBytes(message + '\n');
-            if(message.equalsIgnoreCase("quit")){
+
+            //If message is 'quit', close connection
+            if (message.equalsIgnoreCase("quit")) {
                 break;
             }
 
+            //Get message from server
             message = fromServer.nextLine();
             System.out.println(message);
-            if (message.equalsIgnoreCase("quit")){
+
+            //If message is quit, close connection
+            if (message.equalsIgnoreCase("quit")) {
                 break;
             }
         }
