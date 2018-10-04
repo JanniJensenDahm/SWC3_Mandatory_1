@@ -1,5 +1,3 @@
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -21,7 +19,6 @@ public class TCPClient {
         Scanner sc = new Scanner(System.in);
 
 
-
         try {
             InetAddress ip = InetAddress.getByName(IP_SERVER_STR);
 
@@ -34,29 +31,40 @@ public class TCPClient {
             InputStream input = socket.getInputStream();
             OutputStream output = socket.getOutputStream();
 
-            do {
+            while (true){
                 System.out.println("Enter username");
                 username = sc.nextLine();
-            }while (!username.matches("(?=.{1,12}$)[a-åA-Å0-9_]+(-?)") || username.matches("[' ']"));
 
-            byte[] sendUsername = username.getBytes();
-            output.write(sendUsername);
+                String joinUser = "JOIN " + username + ", " + IP_SERVER_STR + ":" + PORT_SERVER;
+                byte[] sendJoin = joinUser.getBytes();
+                output.write(sendJoin);
+
+                byte[] validatedUsername = new byte[1024];
+                input.read(validatedUsername);
+                String usernameValid = new String(validatedUsername);
+                usernameValid = usernameValid.trim();
+                System.out.println(usernameValid);
+
+                if(usernameValid.equalsIgnoreCase("J_OK")){
+                    break;
+                }
+            }
 
             do {
-            sc = new Scanner(System.in);
-            msgToSend = sc.nextLine();
+                sc = new Scanner(System.in);
+                msgToSend = sc.nextLine();
 
-            byte[] dataToSend = msgToSend.getBytes();
-            output.write(dataToSend);
+                byte[] dataToSend = msgToSend.getBytes();
+                output.write(dataToSend);
 
-            byte[] dataIn = new byte[1024];
-            input.read(dataIn);
-            String msgIn = new String(dataIn);
-            msgIn = msgIn.trim();
+                byte[] dataIn = new byte[1024];
+                input.read(dataIn);
+                String msgIn = new String(dataIn);
+                msgIn = msgIn.trim();
 
 
-            System.out.println(msgIn);
-            }while (!msgToSend.equalsIgnoreCase("quit"));
+                System.out.println(msgIn);
+            } while (!msgToSend.equalsIgnoreCase("quit"));
 
         } catch (UnknownHostException e) {
             e.printStackTrace();

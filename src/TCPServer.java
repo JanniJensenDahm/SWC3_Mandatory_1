@@ -14,25 +14,17 @@ public class TCPServer {
 
         try {
             ServerSocket serverSocket = new ServerSocket(5656);
-            Socket socket;
 
             while (true) {
                 System.out.println("Trying to connect to client");
                 acceptClient(serverSocket);
-                /*DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-
-                //
-
-                //Create new client
-                Client client = new Client();*/
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
 
-    public static void acceptClient(ServerSocket serverSocket){
+    public static void acceptClient(ServerSocket serverSocket) {
         Socket socket;
         String clientIp;
         String username;
@@ -55,14 +47,25 @@ public class TCPServer {
             InputStream input = socket.getInputStream();
             OutputStream output = socket.getOutputStream();
 
-            //Create username max 12 chars, only letters, digits, hyphen (-) and underscore (_) allowed
-            //As long as it
-            do {
-                byte[] usernameIn = new byte[1024];
-                input.read(usernameIn);
-                username = new String(usernameIn);
-                username = username.trim();
-            }while (!username.matches("(?=.{1,12}$)[a-åA-Å0-9_]+(-?)") || username.matches("[' ']") /*|| activeClients.contains(username)*/);
+            //get join method
+
+            byte[] usernameIn = new byte[1024];
+            input.read(usernameIn);
+            username = new String(usernameIn);
+            int endUsername = username.indexOf(",");
+            username = username.substring(5, endUsername);
+            username = username.trim();
+            System.out.println(username);
+
+            while (!username.matches("(?=.{1,12}$)[a-åA-Å0-9_-]+") || username.matches("[' ']")) {
+                String msgToSend = "J_ER username not accepted: Only 12 chars long and only letters, digits, hyphen and underscore are allowed";
+                byte[] dataToSend = msgToSend.getBytes();
+                output.write(dataToSend);
+            }
+
+            String validUsername = "J_OK";
+            byte[] usernameValid = validUsername.getBytes();
+            output.write(usernameValid);
 
             //Create client and add to active clients
             Client client = new Client(socket, clientIp, username, input, output);
