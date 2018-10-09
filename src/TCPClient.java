@@ -8,6 +8,9 @@ import java.util.Scanner;
  * @author Janni on 27. sep. 2018
  */
 public class TCPClient {
+    static InputStream input;
+    static OutputStream output;
+    static Socket socket;
 
     public static void main(String[] args) {
         String msgToSend;
@@ -26,10 +29,10 @@ public class TCPClient {
             System.out.println("SERVER IP: " + IP_SERVER_STR);
             System.out.println("SERVER PORT: " + PORT_SERVER + "\n");
 
-            Socket socket = new Socket(ip, PORT_SERVER);
+            socket = new Socket(ip, PORT_SERVER);
 
-            InputStream input = socket.getInputStream();
-            OutputStream output = socket.getOutputStream();
+            input = socket.getInputStream();
+            output = socket.getOutputStream();
 
             while (true){
                 System.out.println("Enter username");
@@ -49,21 +52,17 @@ public class TCPClient {
                     break;
                 }
             }
+            imAlive();
+            sendMessageToServer();
 
             do {
+                //Userinput
                 sc = new Scanner(System.in);
-                msgToSend = sc.nextLine();
+                msgToSend = "DATA " + username + ": " + sc.nextLine();
 
-                byte[] dataToSend = msgToSend.getBytes();
-                output.write(dataToSend);
+                //Send message to server
+                output.write(msgToSend.getBytes());
 
-                byte[] dataIn = new byte[1024];
-                input.read(dataIn);
-                String msgIn = new String(dataIn);
-                msgIn = msgIn.trim();
-
-
-                System.out.println(msgIn);
             } while (!msgToSend.equalsIgnoreCase("quit"));
 
         } catch (UnknownHostException e) {
@@ -71,5 +70,37 @@ public class TCPClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    //Sends message to server
+    public static void sendMessageToServer(){
+        Thread sendMessageToAll = new Thread(() -> {
+            while (true) {
+                byte[] inputFromServer = new byte[1024];
+                try {
+                    input.read(inputFromServer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String usernameValid = new String(inputFromServer);
+                usernameValid = usernameValid.trim();
+                System.out.println(usernameValid);
+            }
+        });
+        sendMessageToAll.start();
+    }
+
+    //Sends IMAV to server every 60 sec
+    public static void imAlive(){
+        Thread imAlive = new Thread(() -> {
+            while (true){
+                try {
+                    Thread.sleep(60_000);
+                    output.write("IMAV".getBytes());
+                }catch (InterruptedException e){}
+                catch (IOException e){}
+            }
+        });
+        imAlive.start();
     }
 }
