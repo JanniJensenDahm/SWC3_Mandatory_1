@@ -11,19 +11,19 @@ public class Client implements Runnable {
     private String clientIp;
     private InputStream input;
     private OutputStream output;
-    private int imAlive;
+    private long imAlive;
 
     public Client(){
 
     }
 
-    public Client(Socket socket, String clientIp, String username, InputStream input, OutputStream output) {
+    public Client(Socket socket, String clientIp, String username, InputStream input, OutputStream output, long timestamp) {
         this.socket = socket;
         this.clientIp = clientIp;
         this.username = username;
         this.input = input;
         this.output = output;
-        this.imAlive = 0;
+        this.imAlive = timestamp;
     }
 
     @Override
@@ -36,24 +36,32 @@ public class Client implements Runnable {
                 String msgIn = new String(dataIn);
                 msgIn = msgIn.trim();
 
+                //Message split at ':', check message after ':'
                 int splitMsg = msgIn.indexOf(":");
                 msgIn = msgIn.substring(splitMsg + 2);
-                System.out.println(msgIn);
 
-                //Send message from one user to all users
-                if(!msgIn.equalsIgnoreCase("quit") && !msgIn.equals("IMAV")) {
+
+                //Send message from one user to all users if not 'quit' or 'IMAV'
+                if(!msgIn.equalsIgnoreCase("quit") && !msgIn.equals("IMAV") && msgIn.length() <= 250) {
                     msgIn = username + ": " + msgIn;
                     TCPServer.sendMessageToAll(msgIn, username);
                 }else if(msgIn.equalsIgnoreCase("quit")){
-                    socket.close();
-                    input.close();
-                    output.close();
+                    //If message is quit, close socket and break loop.
+                    System.out.println("im here");
+                    //socket.close();
+                    //input.close();
+                    //output.close();
                     //TCPServer.removeUser(username);
-                    break;
+                    //break;
                 }else if(msgIn.equals("IMAV")){
-                    System.out.println("im IMAV");
+                    long timestamp = System.currentTimeMillis();
+                    TCPServer.checkImAlive(timestamp, username);
+                }else if(msgIn.length() > 250){
+                    msgIn = msgIn.substring(0, 249);
+                    TCPServer.sendMessageToAll(msgIn, username);
                 }
             } while (true);
+
         }catch (Exception e){}
     }
 
@@ -100,5 +108,13 @@ public class Client implements Runnable {
 
     public void setOutput(OutputStream output) {
         this.output = output;
+    }
+
+    public long getImAlive() {
+        return imAlive;
+    }
+
+    public void setImAlive(long imAlive) {
+        this.imAlive = imAlive;
     }
 }

@@ -11,8 +11,7 @@ import java.util.Scanner;
 public class TCPServer {
     static ArrayList<Client> activeClients = new ArrayList<>();
     static ArrayList<String> usernames = new ArrayList<>();
-    static Client client;
-
+    static Client client = new Client();
 
     public static void main(String[] args) {
 
@@ -22,6 +21,7 @@ public class TCPServer {
 
             while (true) {
                 System.out.println("Trying to connect to client");
+                checkActiveClients();
                 acceptClient(serverSocket);
             }
         } catch (Exception e) {
@@ -72,10 +72,10 @@ public class TCPServer {
             String validUsername = "J_OK";
             output.write(validUsername.getBytes());
 
+            long timestamp = System.currentTimeMillis();
 
             //Create client and add to active clients
-
-            client = new Client(socket, clientIp, username, input, output);
+            client = new Client(socket, clientIp, username, input, output, timestamp);
             activeClients.add(client);
             usernames.add(username);
 
@@ -89,6 +89,25 @@ public class TCPServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public static void checkActiveClients(){
+        Thread checkActiveClients = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(100000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                for (Client client : activeClients) {
+                    long timestampNow = System.currentTimeMillis();
+                    long timeAlive = (timestampNow - client.getImAlive()) / 1000;
+                    if (timeAlive > 100) {
+                        removeUser(client.getUsername());
+                    }
+                }
+            }
+        });
+        checkActiveClients.start();
     }
 
     public static void sendMessageToAll(String msgToSend, String username){
@@ -106,13 +125,28 @@ public class TCPServer {
         sendMsgToAll.start();
     }
 
-    public static void removeUser(String username){
-        for(int i = 0; i < activeClients.size(); i++) {
-            if (username.equals(client.getUsername())){
-                activeClients.remove(client);
-                break;
+    public static void checkImAlive(long timestamp, String username){
+        for (Client client : activeClients) {
+            if (client.getUsername().equals(username)){
+                long tempTime = client.getImAlive();
+                long secondsAlive = (timestamp-tempTime)/1000;
+                if (secondsAlive < 100){
+                    client.setImAlive(timestamp);
+                    System.out.println(client.getImAlive());
+                }
             }
         }
     }
+
+    public static void removeUser(String username){
+        System.out.println(activeClients);
+        for(Client client : activeClients) {
+            if (username.equals(client.getUsername())){
+                activeClients.remove(client);
+                System.out.println(activeClients);
+            }
+        }
+    }
+
 
 }

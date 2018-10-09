@@ -11,12 +11,12 @@ public class TCPClient {
     static InputStream input;
     static OutputStream output;
     static Socket socket;
+    static String username;
 
     public static void main(String[] args) {
         String msgToSend;
         final String IP_SERVER_STR = "127.0.0.1";
         final int PORT_SERVER = 5656;
-        String username;
         System.out.println("=============CLIENT==============");
 
         Scanner sc = new Scanner(System.in);
@@ -96,7 +96,8 @@ public class TCPClient {
             while (true){
                 try {
                     Thread.sleep(60_000);
-                    output.write("IMAV".getBytes());
+                    String imAliveMsg = "DATA" + username + ": IMAV";
+                    output.write(imAliveMsg.getBytes());
                 }catch (InterruptedException e){}
                 catch (IOException e){}
             }
