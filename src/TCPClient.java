@@ -12,10 +12,13 @@ public class TCPClient {
     static OutputStream output;
     static Socket socket;
     static String username;
+    static Thread receiveMessageFromServer;
+    static Thread imAlive;
 
     public static void main(String[] args) {
         String msgToSend;
         final String IP_SERVER_STR = "127.0.0.1";
+        //final String IP_SERVER_STR = "172.16.22.226";
         final int PORT_SERVER = 5656;
         System.out.println("=============CLIENT==============");
 
@@ -53,17 +56,25 @@ public class TCPClient {
                 }
             }
             imAlive();
-            sendMessageToServer();
+            receiveMessageFromServer();
 
             do {
                 //Userinput
                 sc = new Scanner(System.in);
-                msgToSend = "DATA " + username + ": " + sc.nextLine();
+                msgToSend = sc.nextLine();
+
+                if(!msgToSend.equals("quit")){
+                    msgToSend = "DATA " + username + ": " + msgToSend;
+                }
 
                 //Send message to server
                 output.write(msgToSend.getBytes());
 
             } while (!msgToSend.equalsIgnoreCase("quit"));
+
+            System.out.println("linje 68");
+            receiveMessageFromServer.interrupt();
+            imAlive.interrupt();
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -72,9 +83,9 @@ public class TCPClient {
         }
     }
 
-    //Sends message to server
-    public static void sendMessageToServer(){
-        Thread sendMessageToAll = new Thread(() -> {
+    //Receive message from server
+    public static void receiveMessageFromServer(){
+        receiveMessageFromServer = new Thread(() -> {
             while (true) {
                 byte[] inputFromServer = new byte[1024];
                 try {
@@ -82,21 +93,24 @@ public class TCPClient {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                String usernameValid = new String(inputFromServer);
-                usernameValid = usernameValid.trim();
-                System.out.println(usernameValid);
+                if(inputFromServer[0] == 0){
+                    break;
+                }
+                String msgIn = new String(inputFromServer);
+                msgIn = msgIn.trim();
+                System.out.println(msgIn);
             }
         });
-        sendMessageToAll.start();
+        receiveMessageFromServer.start();
     }
 
     //Sends IMAV to server every 60 sec
     public static void imAlive(){
-        Thread imAlive = new Thread(() -> {
+        imAlive = new Thread(() -> {
             while (true){
                 try {
                     Thread.sleep(60_000);
-                    String imAliveMsg = "DATA" + username + ": IMAV";
+                    String imAliveMsg = "IMAV";
                     output.write(imAliveMsg.getBytes());
                 }catch (InterruptedException e){}
                 catch (IOException e){}

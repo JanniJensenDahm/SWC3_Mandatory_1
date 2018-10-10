@@ -61,13 +61,14 @@ public class TCPServer {
                 username = username.substring(5, endUsername);
                 username = username.trim();
                 System.out.println(username);
-                if (username.matches("(?=.{1,12}$)[a-zA-Z0-9_-]+") && !username.matches("[' ']") && !usernames.contains(username)){
+                if (username.matches("(?=.{1,12}$)[a-zA-Z0-9_-]+") && !username.matches("[' ']") && !usernames.contains(username)) {
                     break;
                 }
                 msgToSend = "J_ER username not accepted: Only 12 chars long and only letters, digits, hyphen and underscore are allowed";
                 output.write(msgToSend.getBytes());
 
-            }while (!username.matches("(?=.{1,12}$)[a-zA-Z0-9_-]+") || username.matches("[' ']") || usernames.contains(username));
+            }
+            while (!username.matches("(?=.{1,12}$)[a-zA-Z0-9_-]+") || username.matches("[' ']") || usernames.contains(username));
 
             String validUsername = "J_OK";
             output.write(validUsername.getBytes());
@@ -80,7 +81,9 @@ public class TCPServer {
             usernames.add(username);
 
             String newUser = "LIST " + usernames;
-            output.write(newUser.getBytes());
+            for (Client client : activeClients) {
+                client.getOutput().write(newUser.getBytes());
+            }
 
             //Create thread with client
             Thread thread = new Thread(client);
@@ -90,7 +93,8 @@ public class TCPServer {
             e.printStackTrace();
         }
     }
-    public static void checkActiveClients(){
+
+    public static void checkActiveClients() {
         Thread checkActiveClients = new Thread(() -> {
             while (true) {
                 try {
@@ -102,7 +106,11 @@ public class TCPServer {
                     long timestampNow = System.currentTimeMillis();
                     long timeAlive = (timestampNow - client.getImAlive()) / 1000;
                     if (timeAlive > 100) {
-                        removeUser(client.getUsername());
+                        try {
+                            removeUser(client.getUsername());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -110,42 +118,58 @@ public class TCPServer {
         checkActiveClients.start();
     }
 
-    public static void sendMessageToAll(String msgToSend, String username){
+    public static void sendMessageToAll(String msgToSend, String username) {
         Thread sendMsgToAll = new Thread(() -> {
             try {
                 //Send message to all clients but it self
-                if(!msgToSend.equals("quit") && !msgToSend.equals("IMAV"))
                 for (Client client : activeClients) {
                     if (!username.equals(client.getUsername())) {
                         client.getOutput().write(msgToSend.getBytes());
                     }
                 }
-            }catch (IOException e){}
+            } catch (IOException e) {
+            }
         });
         sendMsgToAll.start();
     }
 
-    public static void checkImAlive(long timestamp, String username){
+    public static void checkImAlive(long timestamp, String username) {
         for (Client client : activeClients) {
-            if (client.getUsername().equals(username)){
+            if (client.getUsername().equals(username)) {
                 long tempTime = client.getImAlive();
-                long secondsAlive = (timestamp-tempTime)/1000;
-                if (secondsAlive < 100){
+                long secondsAlive = (timestamp - tempTime) / 1000;
+                if (secondsAlive < 100) {
                     client.setImAlive(timestamp);
-                    System.out.println(client.getImAlive());
                 }
             }
         }
     }
 
-    public static void removeUser(String username){
-        System.out.println(activeClients);
-        for(Client client : activeClients) {
-            if (username.equals(client.getUsername())){
+    public static void removeUser(String username) throws IOException {
+        System.out.println("Linje 149");
+        for (Client client : activeClients) {
+            System.out.println("Linje 151");
+            if (username.equals(client.getUsername())) {
                 activeClients.remove(client);
-                System.out.println(activeClients);
+                System.out.println("linje154");
+                System.out.println(usernames);
             }
         }
+        System.out.println(usernames);
+        for (String user : usernames) {
+            System.out.println("linje 158");
+            if (username.equals(user)) {
+                System.out.println("linje 160");
+                usernames.remove(user);
+            }
+
+        }
+        for (Client client : activeClients) {
+            System.out.println("Linje 166");
+            String msgToSend = "LIST" + usernames;
+            client.getOutput().write(msgToSend.getBytes());
+        }
+
     }
 
 

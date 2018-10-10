@@ -36,23 +36,27 @@ public class Client implements Runnable {
                 String msgIn = new String(dataIn);
                 msgIn = msgIn.trim();
 
-                //Message split at ':', check message after ':'
-                int splitMsg = msgIn.indexOf(":");
-                msgIn = msgIn.substring(splitMsg + 2);
+                if (msgIn.substring(0,4).equals("DATA")) {
+                    //Message split at ':', check message after ':'
+                    int splitMsg = msgIn.indexOf(":");
+                    msgIn = msgIn.substring(splitMsg + 2);
+                }
 
 
                 //Send message from one user to all users if not 'quit' or 'IMAV'
                 if(!msgIn.equalsIgnoreCase("quit") && !msgIn.equals("IMAV") && msgIn.length() <= 250) {
                     msgIn = username + ": " + msgIn;
+                    System.out.println(msgIn);
                     TCPServer.sendMessageToAll(msgIn, username);
                 }else if(msgIn.equalsIgnoreCase("quit")){
                     //If message is quit, close socket and break loop.
                     System.out.println("im here");
-                    //socket.close();
-                    //input.close();
-                    //output.close();
-                    //TCPServer.removeUser(username);
-                    //break;
+                    getSocket().close();
+                    input.close();
+                    output.close();
+                    System.out.println("linje 57");
+                    TCPServer.removeUser(username);
+                    break;
                 }else if(msgIn.equals("IMAV")){
                     long timestamp = System.currentTimeMillis();
                     TCPServer.checkImAlive(timestamp, username);
