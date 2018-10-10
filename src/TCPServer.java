@@ -146,27 +146,23 @@ public class TCPServer {
     }
 
     public static void removeUser(String username) throws IOException {
-        System.out.println("Linje 149");
         for (Client client : activeClients) {
-            System.out.println("Linje 151");
             if (username.equals(client.getUsername())) {
                 activeClients.remove(client);
-                System.out.println("linje154");
                 System.out.println(usernames);
+                break;
             }
         }
         System.out.println(usernames);
         for (String user : usernames) {
-            System.out.println("linje 158");
             if (username.equals(user)) {
-                System.out.println("linje 160");
                 usernames.remove(user);
+                break;
             }
 
         }
         for (Client client : activeClients) {
-            System.out.println("Linje 166");
-            String msgToSend = "LIST" + usernames;
+            String msgToSend = "LIST " + usernames;
             client.getOutput().write(msgToSend.getBytes());
         }
 

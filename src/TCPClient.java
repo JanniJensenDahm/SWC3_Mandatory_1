@@ -72,10 +72,7 @@ public class TCPClient {
 
             } while (!msgToSend.equalsIgnoreCase("quit"));
 
-            System.out.println("linje 68");
-            receiveMessageFromServer.interrupt();
-            imAlive.interrupt();
-
+            System.exit(0);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
