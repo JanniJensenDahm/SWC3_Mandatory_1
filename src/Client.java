@@ -50,11 +50,9 @@ public class Client implements Runnable {
                     TCPServer.sendMessageToAll(msgIn, username);
                 }else if(msgIn.equalsIgnoreCase("quit")){
                     //If message is quit, close socket and break loop.
-                    System.out.println("im here");
                     getSocket().close();
                     input.close();
                     output.close();
-                    System.out.println("linje 57");
                     TCPServer.removeUser(username);
                     break;
                 }else if(msgIn.equals("IMAV")){

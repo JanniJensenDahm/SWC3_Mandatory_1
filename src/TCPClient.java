@@ -18,12 +18,10 @@ public class TCPClient {
     public static void main(String[] args) {
         String msgToSend;
         final String IP_SERVER_STR = "127.0.0.1";
-        //final String IP_SERVER_STR = "172.16.22.226";
         final int PORT_SERVER = 5656;
         System.out.println("=============CLIENT==============");
 
         Scanner sc = new Scanner(System.in);
-
 
         try {
             InetAddress ip = InetAddress.getByName(IP_SERVER_STR);
