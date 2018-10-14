@@ -5,7 +5,7 @@ import java.net.Socket;
 /**
  * @author Janni on 01. okt. 2018
  */
-public class Client implements Runnable {
+public class Client {
     private Socket socket;
     private String username;
     private String clientIp;
@@ -24,47 +24,6 @@ public class Client implements Runnable {
         this.input = input;
         this.output = output;
         this.imAlive = timestamp;
-    }
-
-    @Override
-    public void run(){
-        try {
-            do {
-                //Message received from user
-                byte[] dataIn = new byte[1024];
-                input.read(dataIn);
-                String msgIn = new String(dataIn);
-                msgIn = msgIn.trim();
-
-                if (msgIn.substring(0,4).equals("DATA")) {
-                    //Message split at ':', check message after ':'
-                    int splitMsg = msgIn.indexOf(":");
-                    msgIn = msgIn.substring(splitMsg + 2);
-                }
-
-
-                //Send message from one user to all users if not 'quit' or 'IMAV'
-                if(!msgIn.equals("QUIT") && !msgIn.equals("IMAV") && msgIn.length() <= 250) {
-                    msgIn = username + ": " + msgIn;
-                    System.out.println(msgIn);
-                    TCPServer.sendMessageToAll(msgIn, username);
-                }else if(msgIn.equals("QUIT")){
-                    //If message is quit, close socket and break loop.
-                    getSocket().close();
-                    input.close();
-                    output.close();
-                    TCPServer.removeUser(username);
-                    break;
-                }else if(msgIn.equals("IMAV")){
-                    long timestamp = System.currentTimeMillis();
-                    TCPServer.checkImAlive(timestamp, username);
-                }else if(msgIn.length() > 250){
-                    msgIn = msgIn.substring(0, 249);
-                    TCPServer.sendMessageToAll(msgIn, username);
-                }
-            } while (true);
-
-        }catch (Exception e){}
     }
 
     @Override

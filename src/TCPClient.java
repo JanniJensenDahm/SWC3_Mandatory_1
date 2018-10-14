@@ -61,7 +61,7 @@ public class TCPClient {
                 sc = new Scanner(System.in);
                 msgToSend = sc.nextLine();
 
-                if(!msgToSend.equalsIgnoreCase("quit")){
+                if(!msgToSend.equals("QUIT")){
                     msgToSend = "DATA " + username + ": " + msgToSend;
                 }
 
