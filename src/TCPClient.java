@@ -61,14 +61,14 @@ public class TCPClient {
                 sc = new Scanner(System.in);
                 msgToSend = sc.nextLine();
 
-                if(!msgToSend.equals("quit")){
+                if(!msgToSend.equalsIgnoreCase("quit")){
                     msgToSend = "DATA " + username + ": " + msgToSend;
                 }
 
                 //Send message to server
                 output.write(msgToSend.getBytes());
 
-            } while (!msgToSend.equalsIgnoreCase("quit"));
+            } while (!msgToSend.equals("QUIT"));
 
             System.exit(0);
         } catch (UnknownHostException e) {

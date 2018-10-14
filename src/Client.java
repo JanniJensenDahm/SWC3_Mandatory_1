@@ -44,11 +44,11 @@ public class Client implements Runnable {
 
 
                 //Send message from one user to all users if not 'quit' or 'IMAV'
-                if(!msgIn.equalsIgnoreCase("quit") && !msgIn.equals("IMAV") && msgIn.length() <= 250) {
+                if(!msgIn.equals("QUIT") && !msgIn.equals("IMAV") && msgIn.length() <= 250) {
                     msgIn = username + ": " + msgIn;
                     System.out.println(msgIn);
                     TCPServer.sendMessageToAll(msgIn, username);
-                }else if(msgIn.equalsIgnoreCase("quit")){
+                }else if(msgIn.equals("QUIT")){
                     //If message is quit, close socket and break loop.
                     getSocket().close();
                     input.close();

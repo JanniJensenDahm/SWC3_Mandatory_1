@@ -1,9 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * @author Janni on 27. sep. 2018
@@ -149,7 +147,6 @@ public class TCPServer {
         for (Client client : activeClients) {
             if (username.equals(client.getUsername())) {
                 activeClients.remove(client);
-                System.out.println(usernames);
                 break;
             }
         }
